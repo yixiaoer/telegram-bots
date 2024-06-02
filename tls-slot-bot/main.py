@@ -49,7 +49,7 @@ def login(driver: Firefox) -> None:
     time.sleep(10.)
 
 def refresh_until_have_slot(driver: Firefox) -> None:
-    driver.get(f'https://visas-ch.tlscontact.com/appointment/gb/gbLON2ch/{VISA_GRP_NUMBER}')
+    driver.get(f'https://visas-ch.tlscontact.com/appointment/gb/gbLON2ch/{VISA_GRP_ID}')
 
     while True:
         time.sleep(15.)
