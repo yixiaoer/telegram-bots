@@ -23,10 +23,9 @@ Config:
 
 ```sh
 cp config.example.py config.py
-modify config.py
 ```
 
-The items in the configuration are as follows:
+Modify `config.py`. The items in the configuration are as follows:
 
 - **TLS_USERNAME**: The username for your TLS Contact account.
 - **TLS_PASSWORD**: The password for your TLS Contact account.
