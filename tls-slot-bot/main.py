@@ -54,8 +54,15 @@ def refresh_until_have_slot(driver: Firefox) -> None:
     while True:
         time.sleep(15.)
 
-        elements = driver.find_elements(By.CSS_SELECTOR, '#app > div.tls-appointment > div.tls-popup-display > div.tls-popup-display--container > div > div > div.tls-popup--body > div:nth-child(2) > div:nth-child(1)')
-        if not elements or 'Sorry, there is no available appointment at the moment' not in elements[0].text:
+        error_page_elem_selector = '.tls-field--label > .tls-label'
+        error_page_elem = driver.find_elements(By.CSS_SELECTOR, error_page_elem_selector)
+        if error_page_elem and 'Please begin by selecting the country where you are applying from' in error_page_elem[0].text:
+            driver.get(f'https://visas-ch.tlscontact.com/appointment/gb/gbLON2ch/{VISA_GRP_ID}')
+            continue
+
+        prmopt_selector = '#app > div.tls-appointment > div.tls-popup-display > div.tls-popup-display--container > div > div > div.tls-popup--body > div:nth-child(2) > div:nth-child(1)'
+        prompt = driver.find_elements(By.CSS_SELECTOR, prmopt_selector)
+        if not prompt or 'Sorry, there is no available appointment at the moment' not in prompt[0].text:
             break
 
         time.sleep(SLEEP_TIME)
