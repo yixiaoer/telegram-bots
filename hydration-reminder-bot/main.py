@@ -108,9 +108,12 @@ async def process_setting(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         if text is not None:
             if text.isdigit():
                 end_time = int(text)
-                user_info['end_time'] = end_time
-                replace_next_reminder(user_id, user_info, context)
-                await update.message.reply_text(f'End time has been set to {end_time}:00.')
+                if end_time > 23:
+                    await update.message.reply_text(f'End time should be an integer between 0 and 23.')
+                else:
+                    user_info['end_time'] = end_time
+                    replace_next_reminder(user_id, user_info, context)
+                    await update.message.reply_text(f'End time has been set to {end_time}:00.')
             else:
                 try:
                     parts = text.split(maxsplit=1)
@@ -122,7 +125,7 @@ async def process_setting(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                     else:
                         await update.message.reply_text(f'Cup number must be between 1 and {DAILY_WATER_GOAL}.')
                 except (IndexError, ValueError):
-                    await update.message.reply_text(f'Invalid format. Please enter a number for the end time or a number (1-{DAILY_WATER_GOAL}) followed by a note.')
+                    await update.message.reply_text(f'Invalid format. Please enter a number for the end time(0 ~ 23) or a number (1 ~ {DAILY_WATER_GOAL}) followed by a note.')
 
 async def add_one(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_user is not None and update.message is not None and update.effective_chat is not None:
