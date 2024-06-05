@@ -89,6 +89,16 @@ async def setting(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 f'Set your special note with a number (1~{DAILY_WATER_GOAL}) and text.'
             )
 
+def replace_next_reminder(user_id: int, user_info: UserInfo, context: ContextTypes.DEFAULT_TYPE) -> None:
+    next_reminder = calculate_next_reminder(user_id)
+    if next_reminder is not None and isinstance(context.job_queue, JobQueue):
+        if user_info['reminder_job'] is not None and not user_info['reminder_job'].removed:
+                # the previous one job is not completed, but here to replace to another job, so `schedule_removal`
+                user_info['reminder_job'].schedule_removal()
+
+        job = context.job_queue.run_once(send_reminder, next_reminder - datetime.now(), data={'user_id': user_id}, chat_id=user_id)
+        user_info['reminder_job'] = job
+
 async def process_setting(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_user is not None and update.message is not None:
         user_id = update.effective_user.id
@@ -99,6 +109,7 @@ async def process_setting(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             if text.isdigit():
                 end_time = int(text)
                 user_info['end_time'] = end_time
+                replace_next_reminder(user_id, user_info, context)
                 await update.message.reply_text(f'End time has been set to {end_time}:00.')
             else:
                 try:
@@ -122,14 +133,7 @@ async def add_one(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
         await update.message.reply_text(f'This is your {user_info['water_count']} cup of water today.')
 
-        next_reminder = calculate_next_reminder(user_id)
-        if next_reminder is not None and isinstance(context.job_queue, JobQueue):
-            if user_info['reminder_job'] is not None and not user_info['reminder_job'].removed:
-                    # the previous one job is not completed, but here to replace to another job, so `schedule_removal`
-                    user_info['reminder_job'].schedule_removal()
-
-            job = context.job_queue.run_once(send_reminder, next_reminder - datetime.now(), data={'user_id': user_id}, chat_id=update.effective_chat.id)
-            user_info['reminder_job'] = job
+        replace_next_reminder(user_id, user_info, context)
 
 def calculate_next_reminder(user_id: int) -> None | datetime:
     user_info = users_info[user_id]
@@ -177,7 +181,7 @@ async def send_reminder(context: ContextTypes.DEFAULT_TYPE) -> None:
             job = context.job_queue.run_once(send_reminder, next_reminder - now, data={'user_id': user_id}, chat_id=user_id)
             user_info['reminder_job'] = job
 
-def main():
+def main() -> None:
     application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
     application.add_handler(CommandHandler('start', start))
