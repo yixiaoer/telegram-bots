@@ -9,7 +9,7 @@ from config import TELEGRAM_BOT_TOKEN, GROUP_CHAT_ID, BOT_CHAT_ID
 timezone = pytz.timezone('Asia/Singapore')
 
 def get_time() -> str:
-    return datetime.now(timezone).strftime('%-m.%d %H:%M')
+    return datetime.now(timezone).strftime('%-m.%-d %H:%M')
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [['Available', 'Maybe', 'Busy']]
