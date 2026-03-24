@@ -1,3 +1,4 @@
+from datetime import datetime
 import time
 
 from telepot import Bot
@@ -13,6 +14,8 @@ from config import *
 
 SLEEP_TIME = 180.0
 MSG_REPEAT_TIME = 20
+
+DEFAULT_TEXT =  None
 
 def initialise_driver() -> Firefox:
     options = Options()
@@ -49,6 +52,7 @@ def login(driver: Firefox) -> None:
     time.sleep(10.)
 
 def refresh_until_have_slot(driver: Firefox) -> None:
+    global DEFAULT_TEXT
     driver.get(f'https://visas-ch.tlscontact.com/appointment/gb/gbLON2ch/{VISA_GRP_ID}')
 
     while True:
@@ -60,11 +64,16 @@ def refresh_until_have_slot(driver: Firefox) -> None:
             driver.get(f'https://visas-ch.tlscontact.com/appointment/gb/gbLON2ch/{VISA_GRP_ID}')
             continue
 
-        prmopt_selector = '#app > div.tls-appointment > div.tls-popup-display > div.tls-popup-display--container > div > div > div.tls-popup--body > div:nth-child(2) > div:nth-child(1)'
+        prmopt_selector = '.app > .tls-appointment > .tls-appointment-content > .tls-appointment-time-picker'
         prompt = driver.find_elements(By.CSS_SELECTOR, prmopt_selector)
-        if not prompt or 'Sorry, there is no available appointment at the moment' not in prompt[0].text:
+        text = prompt[0].get_attribute('innerHTML')
+        if DEFAULT_TEXT is None:
+            print('text:', text)
+            DEFAULT_TEXT = text
+        elif text != DEFAULT_TEXT:
             break
 
+        print(datetime.now().isoformat(), 'Not working...')
         time.sleep(SLEEP_TIME)
         driver.refresh()
 
